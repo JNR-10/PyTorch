@@ -79,4 +79,69 @@ print(z) # element-wise division if they are of same dimension
 # if y is scalar it would be a scalar division (all elements with a single given integer)
 
 # ? In-place Operations
+t = torch.zeros(3)
+print(t)
 
+t.add_(x)
+t += x
+print(t)
+
+z = x.pow(2)
+z = x**2
+print(z)
+
+z = x > 0 # tensor([True, True, True])
+z = x < 0 # tensor([False, False, False])
+
+x1 = torch.rand([2, 5])
+x2 = torch.rand([5, 3])
+x3 = torch.mm(x1, x2)
+x3 = x1.mm(x2)
+print(x3)
+
+matrix_exp = torch.rand(5,5)
+print(
+    matrix_exp.matrix_power(3)
+)
+
+print(x * y)
+
+z = torch.dot(x, y)
+
+batch = 32
+n = 10
+m = 20
+p = 30
+tensor1 = torch.rand((batch, n, m))
+tensor2 = torch.rand((batch, m, p))
+out_bmm = torch.bmm(tensor1, tensor2)
+print(out_bmm)
+
+x1 = torch.rand((5, 5))
+x2 = torch.ones((1, 5))
+z = (
+    x1 - x2
+)
+z = (
+    x1 ** x2
+)
+
+sum_x = torch.sum(
+    x, dim=0
+)
+values, indices = torch.max(x, dim=0)
+values, indices = torch.min(x, dim=0)
+abs_x = torch.abs(x)
+z = torch.argmax(x, dim=0)
+z = torch.argmin(x, dim=0)
+mean_x = torch.mean(x.float(), dim=0)
+z = torch.eq(x, y)
+sorted_y, indices = torch.sort(y, dim=0, descending=False)
+
+z = torch.clamp(x, min=0)
+
+x = torch.tensor([1, 0, 1, 1, 1], dtype=torch.bool)
+z = torch.any(x)
+z = torch.all(
+    x
+)
