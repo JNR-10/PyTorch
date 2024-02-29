@@ -200,7 +200,7 @@ print(
 ) # The number of dimensions, in this case 1. if x.shape is 5x5x5 ndim would be 3
 x = torch.arange(10)
 print(
-    x.numel() # ? Count the number of elements in x
+    x.numel() # ? Count number of elements in x
 ) # The number of elements in x (in this case it's trivial because it's just a vector)
 
 # """
