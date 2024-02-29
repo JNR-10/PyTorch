@@ -209,40 +209,72 @@ print(
 
 x = torch.arange(9)
 
-# x_3x3 = x.view(3, 3)
+# ? Let's say we want to reshape it to be 3x3
+x_3x3 = x.view(3, 3)
+# ? they work on contigous allocated matrices
 
-# x_3x3 = x.reshape(3, 3)
+# ? We can also do (view and reshape are very similar)
+# ? and the differences are in simple terms (I'm no expert at this),
+# ? is that view acts on contiguous tensors meaning if the
+# ? tensor is stored contiguously in memory or not, whereas
+# ? for reshape it doesn't matter because it will copy the
+# ? tensor to make it contiguously stored, which might come
+# ? with some performance loss.
+x_3x3 = x.reshape(3, 3)
+print(x_3x3)
 
-# y = x_3x3.t()
-# print(
-#     y.is_contiguous()
-# )
-# print(y.contiguous().view(9))
+# If we for example do:
+y = x_3x3.t() # transpose
+print(
+    y.is_contiguous()
+)  # This will return False and if we try to use view now, it won't work!
+# y.view(9) would cause an error, reshape however won't
 
-# x1 = torch.rand(2, 5)
-# x2 = torch.rand(2, 5)
-# print(torch.cat((x1, x2), dim=0).shape)
-# print(torch.cat((x1, x2), dim=1).shape)
+# ? This is because in memory it was stored [0, 1, 2, ... 8], whereas now it's [0, 3, 6, 1, 4, 7, 2, 5, 8]
+# ? The jump is no longer 1 in memory for one element jump (matrices are stored as a contiguous block, and
+# ? using pointers to construct these matrices). This is a bit complicated and I need to explore this more
+# ? as well, at least you know it's a problem to be cautious of! A solution is to do the following
+print(y.contiguous().view(9))  # Calling .contiguous() before view and it works # ! This is unclear!!!!!
 
-# z = x1.view(-1)
+# ? Moving on to another operation, let's say we want to add two tensors dimensions together
+x1 = torch.rand(2, 5)
+x2 = torch.rand(2, 5)
+print(torch.cat((x1, x2), dim=0))  # Shape: 4x5
+print(torch.cat((x1, x2), dim=1))  # Shape 2x10
 
-# batch = 64
-# x = torch.rand((batch, 2, 5))
-# z = x.view(
-#     batch, -1
-# )
+# ? Let's say we want to unroll x1 into one long vector with 10 elements, we can do:
+z = x1.view(-1)  # And -1 will unroll everything
 
-# z = x.permute(0, 2, 1)
+# ? If we instead have an additional dimension and we wish to keep those as is we can do:
+batch = 64
+x = torch.rand((batch, 2, 5))
+z = x.view(
+    batch, -1
+)  # And z.shape would be 64x10, this is very useful stuff and is used all the time
 
-# z = torch.chunk(x, chunks=2, dim=1)
-# print(z[0].shape)
-# print(z[1].shape)
+# ? Let's say we want to switch x axis so that instead of 64x2x5 we have 64x5x2
+# ? i.e we want dimension 0 to stay, dimension 1 to become dimension 2, dimension 2 to become dimension 1
+# ! Basically you tell permute where you want the new dimensions to be, torch.transpose is a special case
+# ! of permute (why?)
+z = x.permute(0, 2, 1)
 
-# x = torch.arange(
-#     10
-# )
-# print(x.unsqueeze(0).shape)
-# print(x.unsqueeze(1).shape)
+# ? Splits x last dimension into chunks of 2 (since 5 is not integer div by 2) the last dimension
+# ? will be smaller, so it will split it into two tensors: 64x2x3 and 64x2x2
+z = torch.chunk(x, chunks=2, dim=1)
+print(z[0].shape)
+print(z[1].shape)
 
-# x = torch.arange(10).unsqueeze(0).unsqueeze(1)
-# z = x.squeeze(1)
+# ? Let's say we want to add an additional dimension
+x = torch.arange(
+    10
+)  # Shape is [10], let's say we want to add an additional so we have 1x10
+print(x.unsqueeze(0))  # 1x10
+print(x.unsqueeze(1))  # 10x1
+
+# ? Let's say we have x which is 1x1x10 and we want to remove a dim so we have 1x10
+x = torch.arange(10).unsqueeze(0).unsqueeze(1)
+print(x)
+
+# ? Perhaps unsurprisingly
+z = x.squeeze(1)  # can also do .squeeze(0) both returns 1x10
+print(z)
