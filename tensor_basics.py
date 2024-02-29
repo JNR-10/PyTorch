@@ -148,7 +148,7 @@ z = torch.clamp(x, min=0, max=10)
 # ? All values < 0 set to 0 and values > 0 unchanged (this is exactly ReLU function i.e when max is not given)
 # ? If you want to values over max_val to be clamped, do torch.clamp(x, min=min_val, max=max_val)
 
-x = torch.tensor([1, 0, 1, 1, 1], dtype=torch.bool) # True/False values
+x = torch.tensor([1, 0, 1, 1, 1], dtype=torch.bool) # ? True/False values
 z = torch.any(x) # will return True, can also do x.any() instead of torch.any(x)
 z = torch.all(
     x
@@ -158,42 +158,50 @@ z = torch.all(
 # * Tensor Indexing
 # """
 
-# batch_size = 10
-# features = 25
-# x = torch.rand((batch_size, features))
+batch_size = 10
+features = 25
+x = torch.rand((batch_size, features)) 
+# print(x)
 
-# print(x[0].shape)
+# ? Get the features of the first example
+print(x[0]) # shape [25], this is same as doing x[0,:]
 
-# print(x[:, 0].shape)
+# ? Get the first feature for all examples
+print(x[:, 0]) # shape [10]
 
-# print(x[2, 0:10].shape)
+# ? # For example: Want to access third example in the batch and the first ten features
+print(x[2, 0:10]) # shape: [10]
 
-# x[0, 0] = 100
+# ? # For example we can use this to, assign certain elements
+x[0, 0] = 100
 
-# x = torch.arange(10)
-# indices = [2, 5, 8]
-# print(x[indices])
+# ? Fancy Indexing
+x = torch.arange(10)
+indices = [2, 5, 8]
+print(x[indices]) # x[indices] = [2, 5, 8]
 
-# x = torch.rand((3, 5))
-# rows = torch.tensor([1, 0])
-# cols = torch.tensor([4, 0])
-# print(x[rows, cols]) 
+x = torch.rand((3, 5))
+rows = torch.tensor([1, 0])
+cols = torch.tensor([4, 0])
+print(x[rows, cols]) # Gets second row fifth column and first row first column (because of ,0)
 
-# x = torch.arange(10)
-# print(x[(x < 2) | (x > 8)])  # will be [0, 1, 9]
-# print(x[x.remainder(2) == 0])
+# ? More advanced Indexing
+x = torch.arange(10)
+print(x[(x < 2) | (x > 8)])  # will be [0, 1, 9] ( | => 'or' operation)
+print(x[x.remainder(2) == 0]) # will be [0, 2, 4, 6, 8]
 
-# print(
-#     torch.where(x > 5, x, x * 2)
-# )
-# x = torch.tensor([0, 0, 1, 2, 2, 3, 4]).unique()
-# print(
-#     x.ndimension()
-# ) 
-# x = torch.arange(10)
-# print(
-#     x.numel()
-# )
+# ? Useful operations for indexing
+print(
+    torch.where(x > 5, x, x * 2)
+) # gives [0, 2, 4, 6, 8, 10, 6, 7, 8, 9], all values x > 5 yield x, else x*2
+x = torch.tensor([0, 0, 1, 2, 2, 3, 4]).unique()
+print(
+    x.ndimension()
+) # The number of dimensions, in this case 1. if x.shape is 5x5x5 ndim would be 3
+x = torch.arange(10)
+print(
+    x.numel() # ? Count number of elements in x
+) # The number of elements in x (in this case it's trivial because it's just a vector)
 
 # """
 # * Tensor Reshaping
