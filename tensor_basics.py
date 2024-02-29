@@ -207,7 +207,7 @@ print(
 # * Tensor Reshaping
 # """
 
-# x = torch.arange(9)
+x = torch.arange(9)
 
 # x_3x3 = x.view(3, 3)
 
