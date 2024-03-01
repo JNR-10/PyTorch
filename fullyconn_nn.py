@@ -81,7 +81,38 @@ test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=Tr
 model = NN(input_size=input_size, num_classes=num_classes).to(device)
 
 # ! Loss and Optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 # ! Train Network
+# going through all the images in the dataset
+for epoch in range(num_epochs):
+    # going through each batch in our train_loader
+    for batch_idx, (data, targets) in enumerate(tqdm(train_loader)):
+        # ? we also want to see which batch index we have so we take ennumerate of train_loader  
+        # Get data to cuda if possible
+        data = data.to(device=device)
+        targets = targets.to(device=device)
+        
+        # Get to correct shape
+        # ? when we see data.shape before this step we see a matrix of [64,1,28,28]
+        # ? we want to unroll it to form a single vector of 784
+        data = data.reshape(data.shape[0], -1) # first one remains 64 and flattens the others in a single dimension
+
+        # Forward
+        scores = model(data)
+        loss = criterion(scores, targets) # (train, test)
+
+        # Backward
+        optimizer.zero_grad()
+        # ? zero_grad() => we want to set the gradients to 0 for each batch
+        # ? so it does not store backprop calculations from previous forward props
+        loss.backward()
+
+        # Gradient descent or adam step
+        optimizer.step()      
+        # ? here we update the weights based on gradients and loss calculated
+    
+    
 
 # ! Check accuracy on training & test
