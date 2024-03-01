@@ -113,6 +113,59 @@ for epoch in range(num_epochs):
         optimizer.step()      
         # ? here we update the weights based on gradients and loss calculated
     
-    
-
 # ! Check accuracy on training & test
+def check_accuracy(loader, model):
+    """
+    * Check accuracy of our trained model given a loader and a model
+
+    * Parameters:
+        * loader: torch.utils.data.DataLoader
+            * A loader for the dataset you want to check accuracy on
+        * model: nn.Module
+            * The model you want to check accuracy on
+
+    * Returns:
+        * acc: float
+            * The accuracy of the model on the dataset given by the loader
+    """
+    if (loader.dataset.train):
+        print("Checking accuracy on training data")
+    else:
+        print("Checking accuracy on testing data")
+         
+    num_correct = 0
+    num_samples = 0
+    model.eval()
+    # ? eval(), because if we use some other technique we want the model know this is evaluation mode
+    # ? which might impact how the calculations would be done
+    
+    # ? when we check the accuracy, we don't need to calculate gradients
+    with torch.no_grad():
+        # Loop through the data
+        for x, y in loader:
+
+            # Move data to device
+            x = x.to(device=device)
+            y = y.to(device=device)
+
+            # Get to correct shape
+            x = x.reshape(x.shape[0], -1)
+
+            # Forward pass
+            scores = model(x) # 64x10
+            # ? we want to know which one of the 10 would be the max
+            _, predictions = scores.max(1)
+            # ? we are interested in the index of the max value
+
+            # Check how many we got correct
+            num_correct += (predictions == y).sum()
+
+            # Keep track of number of samples
+            num_samples += predictions.size(0) # 64 (1st dim)
+
+    model.train()
+    return num_correct / num_samples
+
+# ! Check accuracy on training & test to see how good our model
+print(f"Accuracy on training set: {check_accuracy(train_loader, model)*100:.2f}")
+print(f"Accuracy on test set: {check_accuracy(test_loader, model)*100:.2f}")
