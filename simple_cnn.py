@@ -23,20 +23,23 @@ class CNN(nn.Module):
         super(CNN, self).__init__()
         self.conv1 = nn.Conv2d(
             in_channels = in_channels,
-            out_channels = 8,
+            out_channels = 8, # arbitary number
             kernal_size = 3,
-            stride = 1,
+            stride = 1, # sane convolution (ouput size will change based on these values)
             padding = 1,
+            # ? n_output = floor([n_in + 2p -k]/s) + 1
         )
         self.pool = nn.MaxPool2d(kernal_size = 2, stride = 2)
+        # ? this will half the dimensions
         self.conv2 = nn.Conv2d(
-            in_channel = 8,
-            out_channel = 16,
+            in_channel = 8, # needs to be the same as the putput of the previous
+            out_channel = 16, # arbitary number
             kernal = 3,
             stride = 1,
             padding = 1,
         )
-        self.fc1 = nn.Linear(16*7*7, num_classes)
+        self.fc1 = nn.Linear(16*7*7, num_classes) # ? because 2 pooling layer with 1 padding = (16-1-1)/2 = 14)
+        # Linear(in, out)
         
     def forward(self, x):
         x = F.relu(self.conv1(x))
@@ -44,8 +47,17 @@ class CNN(nn.Module):
         x = F.relu(self.conv2(x))
         x = self.pool(x)
         x = x.reshape(x.shape[0], -1)
+        # ? this is a 4 dimension tensor (mini_batch, channel, dim*dim)
+        # ? and we would keep mini_batches as it is and flatten the other dimensions
         x = self.fc1(x)
         return x
+    
+"""
+* Testing
+model = CNN()
+x = torch.random.randn(64, 1, 28, 28)
+print(model(x).shape)
+"""
     
 # ! Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -73,4 +85,23 @@ model = CNN(in_channels=in_channels, num_classes=num_classes).to(device)
 # ! Loss and Optimizer
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+# ! Train network
+for epoch in range(num_epochs):
+    for batch_idx, (data, targets) in enumerate(tqdm(train_loader)):
+        # Get data to cuda if possible
+        data = data.to(device=device)
+        targets = targets.to(device=device)
         
+        # forward
+        scores = model(data)
+        loss = criterion(scores, targets)
+        
+        # backward
+        optimizer.zero_grad()
+        loss.backward()
+        
+        # gradient descent or adam step
+        optimizer.step()
+        
+    
