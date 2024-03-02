@@ -24,17 +24,17 @@ class CNN(nn.Module):
         self.conv1 = nn.Conv2d(
             in_channels = in_channels,
             out_channels = 8, # arbitary number
-            kernal_size = 3,
+            kernel_size = 3,
             stride = 1, # sane convolution (ouput size will change based on these values)
             padding = 1,
             # ? n_output = floor([n_in + 2p -k]/s) + 1
         )
-        self.pool = nn.MaxPool2d(kernal_size = 2, stride = 2)
+        self.pool = nn.MaxPool2d(kernel_size = 2, stride = 2)
         # ? this will half the dimensions
         self.conv2 = nn.Conv2d(
-            in_channel = 8, # needs to be the same as the putput of the previous
-            out_channel = 16, # arbitary number
-            kernal = 3,
+            in_channels = 8, # needs to be the same as the putput of the previous
+            out_channels = 16, # arbitary number
+            kernel_size = 3,
             stride = 1,
             padding = 1,
         )
@@ -104,4 +104,25 @@ for epoch in range(num_epochs):
         # gradient descent or adam step
         optimizer.step()
         
+# ! Check accuracy on training & test 
+def check_accuracy(loader, model):
+    num_correct = 0
+    num_samples = 0
+    model.eval()
+    
+    with torch.no_grad():
+        for x, y in loader:
+            x = x.to(device=device)
+            y = y.to(device=device)
+            
+            scores = model(x)
+            _, prediction = scores.max(1)
+            num_correct += (prediction == y).sum()
+            num_samples += prediction.size(0)
+            
+    model.train()
+    return num_correct / num_samples
+
+print(f"Accuracy on training set: {check_accuracy(train_loader, model)*100:.2f}")
+print(f"Accuracy on test set: {check_accuracy(test_loader, model)*100:.2f}")
     
