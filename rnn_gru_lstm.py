@@ -67,7 +67,6 @@ class RNN_GRU(nn.Module):
         out, _ = self.gru(x, h0)
         out = out.reshape(out.shape[0], -1)
 
-        # Decode the hidden state of the last time step
         out = self.fc(out)
         return out
 
@@ -92,7 +91,10 @@ class RNN_LSTM(nn.Module):
         )  # out: tensor of shape (batch_size, seq_length, hidden_size)
         out = out.reshape(out.shape[0], -1)
 
-        # Decode the hidden state of the last time step
+        # ? if we want to take a specific hidden state and not the last one
+        # ? remove * seq_length from nn.Linear and modify the following line here
+        # ? out = self.fc(out[:, -1, :]) (here -1 takes the last hidden state)
+
         out = self.fc(out)
         return out
             
