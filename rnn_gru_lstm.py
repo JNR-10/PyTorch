@@ -25,9 +25,9 @@ num_layers = 2
 num_classes = 10
 sequence_length = 28 # so essentially we are taking one row at a time and sending each row at each time-stamp
 # ? we do not need to specify this, it is just for clarity
-learning_rate = 0.005
+learning_rate = 0.001
 batch_size = 64
-num_epochs = 3
+num_epochs = 1
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, num_classes):
@@ -41,7 +41,7 @@ class RNN(nn.Module):
         
     def forward(self, x):
         # Set initial hidden and cell states
-        h0 = torch.zeros(self.num_layers, x.size[0], self.hidden_size).to(device)
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         # Forward prop
         out, _ = self.rnn(x, h0)
         # ? the output '_' will be the hidden state, but we are not going to store the hidden state
@@ -84,6 +84,7 @@ class RNN_LSTM(nn.Module):
         # Set initial hidden and cell states
         h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
         c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        # ? seperate cell state and hidden state
 
         # Forward propagate LSTM
         out, _ = self.lstm(
@@ -106,7 +107,7 @@ train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=
 test_loader = DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=True)
 
 # Initialize network (try out just using simple RNN, or GRU, and then compare with LSTM)
-model = RNN(input_size, hidden_size, num_layers, num_classes).to(device)
+model = RNN_LSTM(input_size, hidden_size, num_layers, num_classes).to(device)
 
 # Loss and optimizer
 criterion = nn.CrossEntropyLoss()
@@ -155,5 +156,5 @@ def check_accuracy(loader, model):
     return num_correct / num_samples
 
 
-print(f"Accuracy on training set: {check_accuracy(train_loader, model)*100:2f}")
+print(f"Accuracy on training set: {check_accuracy(train_loader, model)*100:.2f}")
 print(f"Accuracy on test set: {check_accuracy(test_loader, model)*100:.2f}")
