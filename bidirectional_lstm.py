@@ -116,5 +116,5 @@ def check_accuracy(loader, model):
     model.train()
 
 
-print(f"Accuracy on training set: {check_accuracy(train_loader, model)*100:.2f}")
-print(f"Accuracy on test set: {check_accuracy(test_loader, model)*100:.2f}")
+check_accuracy(train_loader, model)
+check_accuracy(test_loader, model)
