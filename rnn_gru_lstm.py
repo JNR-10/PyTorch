@@ -41,7 +41,28 @@ class RNN(nn.Module):
         out = out.reshape(out.shape[0], -1)
         out = self.fc(out)
         return out
-    
+
+# Recurrent neural network with GRU (many-to-one)
+class RNN_GRU(nn.Module):
+    def __init__(self, input_size, hidden_size, num_layers, num_classes):
+        super(RNN_GRU, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.gru = nn.GRU(input_size, hidden_size, num_layers, batch_first=True)
+        self.fc = nn.Linear(hidden_size * sequence_length, num_classes)
+
+    def forward(self, x):
+        # Set initial hidden and cell states
+        h0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+
+        # Forward propagate LSTM
+        out, _ = self.gru(x, h0)
+        out = out.reshape(out.shape[0], -1)
+
+        # Decode the hidden state of the last time step
+        out = self.fc(out)
+        return out
+        
 # Load Data
 train_dataset = datasets.MNIST(
     root="dataset/", train=True, transform=transforms.ToTensor(), download=True
