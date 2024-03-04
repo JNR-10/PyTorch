@@ -53,6 +53,18 @@ class CNN(nn.Module):
         return x
     
 """
+* Function for load & save
+"""
+def save_checkpoint(state, filename="my_checkpoint.pth.tar"):
+    print("=> Saving Checkpoint")
+    torch.save(state, filename)
+   
+def load_checkpoint(checkpoint, model):
+    print("=> Loading Checkpoint")
+    model.load_state_dict(checkpoint["state_dict"]) 
+    # optimizer.load_state_dict(checkpoint["optimizer"]) 
+    # ? if you save more things like accuracy or epoch, you will have to take this from the dict as well
+"""
 * Testing
 model = CNN()
 x = torch.random.randn(64, 1, 28, 28)
@@ -67,7 +79,9 @@ in_channels = 1
 num_classes = 10
 learning_rate = 3e-4 # karpathy's constant
 batch_size = 64
-num_epochs = 3
+num_epochs = 10
+load_model = True
+# ? once we have saved a model and then we keep load_model = False, it overwrites the previously trained file
 
 # ! Load data
 train_dataset = datasets.MNIST(
@@ -86,8 +100,20 @@ model = CNN(in_channels=in_channels, num_classes=num_classes).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
+if load_model:
+    load_checkpoint(torch.load("my_checkpoint.pth.tar"), model)
+
 # ! Train network
 for epoch in range(num_epochs):
+    """ 
+    * Model Load and Save Code
+    """
+    losses = []
+    if epoch % 3 == 0: # saving every third epoch
+        # you can also have condition on accuracy, if accuracy >= some threshold, save the model
+        checkpoint = {'state_dict': model.state_dict()}
+        save_checkpoint(checkpoint)
+    
     for batch_idx, (data, targets) in enumerate(tqdm(train_loader)):
         # Get data to cuda if possible
         data = data.to(device=device)
@@ -96,6 +122,7 @@ for epoch in range(num_epochs):
         # forward
         scores = model(data)
         loss = criterion(scores, targets)
+        losses.append(loss.item())
         
         # backward
         optimizer.zero_grad()
@@ -103,6 +130,9 @@ for epoch in range(num_epochs):
         
         # gradient descent or adam step
         optimizer.step()
+    
+    mean_loss = sum(losses)/len(losses)
+    print(f'Loss at epoch {epoch} was {mean_loss: .5f}')
         
 # ! Check accuracy on training & test 
 def check_accuracy(loader, model):
