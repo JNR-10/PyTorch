@@ -55,7 +55,7 @@ model.classifier = nn.Sequential(
 )
 model.to(device)
 # import sys
-# print(model)
+print(model)
 # sys.exit()
 # ! Load Data
 train_dataset = datasets.CIFAR10(
